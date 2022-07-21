@@ -1,5 +1,16 @@
+'''
+Author: Joe Auz
+Version: 1.1
+Name: GAME TITLE HERE
+Summary: This is a game with heavy inspiration taken from Cookie Clicker. It is a simple incremental game,
+you click the ore, you get ore. In version 1.1 you currently have the option to purchase a miner to boost
+the amount of ore you get per click. Are you able to reach the fabled Cobalt tier?
+'''
+
 import pygame
 import os
+
+# todo: game title!!!
 
 pygame.display.set_caption('--Game Title Here--')
 pygame.font.init()
@@ -60,11 +71,13 @@ def draw_window(total_ore, total_miners, miner_cost, ore_per_click):
     elif 40 <= total_ore:
         WIN.blit(COBALT, (WIDTH//2 - ORE_WIDTH // 2, HEIGHT // 2 - 100))
 
-    num_ore_text = POINTS_FONT.render('Total Ore: ' + str(round(total_ore, 2)), 1, WHITE)
+    num_ore_text = POINTS_FONT.render(
+        'Total Ore: ' + str(round(total_ore, 2)), 1, WHITE)
     WIN.blit(num_ore_text, (WIDTH // 2 - ORE_WIDTH // 2, 10))
 
-    ore_per_click_text = CLICK_FONT.render('Per Click: ' + str(round(ore_per_click, 2)), 1, WHITE)
-    WIN.blit(ore_per_click_text, (WIDTH // 2 - ORE_WIDTH //2 + 30, 415))
+    ore_per_click_text = CLICK_FONT.render(
+        'Per Click: ' + str(round(ore_per_click, 2)), 1, WHITE)
+    WIN.blit(ore_per_click_text, (WIDTH // 2 - ORE_WIDTH // 2 + 30, 415))
 
     WIN.blit(MINER, (MINER_X, MINER_Y))
 
@@ -72,9 +85,10 @@ def draw_window(total_ore, total_miners, miner_cost, ore_per_click):
         'Total Miners: ' + str(total_miners), 1, WHITE)
     WIN.blit(miner_shop_count_text, (MINER_X + 15, MINER_Y - 25))
 
-    miner_shop_cost_text = SHOP_FONT.render('Cost: '+ str(round(miner_cost, 2)), 1, WHITE)
-    WIN.blit(miner_shop_cost_text, (MINER_X+ 25, MINER_Y + 115))
-    
+    miner_shop_cost_text = SHOP_FONT.render(
+        'Cost: ' + str(round(miner_cost, 2)), 1, WHITE)
+    WIN.blit(miner_shop_cost_text, (MINER_X + 25, MINER_Y + 115))
+
     pygame.display.update()
 
 
@@ -115,7 +129,6 @@ def main():
                 miner_multiplier += 0.1
                 miner_cost = miner_cost * miner_multiplier
                 ore_per_click = ore_per_click * miner_multiplier
-
 
         draw_window(total_ore, total_miners, miner_cost, ore_per_click)
 
