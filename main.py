@@ -53,6 +53,30 @@ COBALT = pygame.transform.scale(pygame.image.load(
 MINER = pygame.transform.scale(pygame.image.load(
     os.path.join('Assets', 'miner.png')), (MINER_WIDTH, MINER_HEIGHT))
 
+class Player:
+
+    def __init__(self, total_ore, total_miners, miner_cost, miner_multiplier, ore_per_click):
+        self.ore = total_ore
+        self.miners = total_miners
+        self.miner_cost = miner_cost
+        self.multiplier = miner_multiplier
+        self.per_click = ore_per_click
+
+    def get_ore(self):
+        return self.ore
+
+    def inc_ore(self):
+        self.ore += self.per_click
+    
+    def inc_miner(self):
+        self.miners += 1
+
+    def up_miner_cost(self):
+        self.miner_cost += 1
+
+# Just implemented Player class, need to swap below functions to Player object for all data.
+
+
 def draw_play(total_ore, total_miners, miner_cost, ore_per_click):
     WIN.blit(MINE_BG, (0, 0))
 
@@ -87,12 +111,11 @@ def draw_play(total_ore, total_miners, miner_cost, ore_per_click):
 
     pygame.display.update()
 
-
 def handle_miner_shop(total_miners):
     if total_miners > 0:
         pygame.event.post(pygame.event.Event(MINER_SHOP))
 
-def save_game(total_ore, total_miners, ore_per_click, miner_multiplier, miner_cost):
+def save_game(total_ore, total_miners, ore_per_click, miner_multiplier, miner_cost, player_one):
     save_data = {
         'Ore': int(total_ore),
         'Miners': total_miners,
@@ -102,7 +125,8 @@ def save_game(total_ore, total_miners, ore_per_click, miner_multiplier, miner_co
     }
     print(save_data)
     with open('ClickIn_Ore.txt', 'w') as save_file:
-        json.dump(save_data, save_file)
+        # json.dump(save_data, save_file)
+        json.dump(player_one.__dict__, save_file)
 
 def load_game():
     if os.path.exists('ClickIn_Ore.txt'):
@@ -120,12 +144,14 @@ def play():
         total_miners = load_game()['Miners']
         miner_multiplier = load_game()['MinerMulti']
         miner_cost = load_game()['MinerCost']
+        player_one = Player(total_ore, total_miners, miner_cost, miner_multiplier, ore_per_click)
     else:
         ore_per_click = 1
         total_ore = 0
         total_miners = 0
         miner_multiplier = 1
         miner_cost = 5
+        player_one = Player(total_ore=0, total_miners=0, miner_cost=5, miner_multiplier=1, ore_per_click=1)
 
     ore = pygame.Rect(WIDTH // 2 - ORE_WIDTH // 2, HEIGHT //
                       2 - 100, ORE_WIDTH, ORE_HEIGHT)
@@ -142,6 +168,8 @@ def play():
                 x, y = event.pos
                 if ore.collidepoint(x, y):
                     total_ore += ore_per_click
+                    player_one.inc_ore()
+                    print(player_one.get_ore())
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 if miner.collidepoint(x, y) and total_ore >= miner_cost:
@@ -156,7 +184,7 @@ def play():
 
         # draw_play(math.floor(total_ore), total_miners, round(miner_cost), math.floor(ore_per_click))
         draw_play(total_ore, total_miners, miner_cost, ore_per_click)
-    save_game(total_ore, total_miners, ore_per_click, miner_multiplier, miner_cost)
+    save_game(total_ore, total_miners, ore_per_click, miner_multiplier, miner_cost, player_one)
     pygame.quit()
 
 
