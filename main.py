@@ -1,6 +1,6 @@
 '''
 Author: Joe Auz
-Version: 1.3
+Version: 1.3.0
 Name: ClickIn Ore
 Summary: This is a game with heavy inspiration taken from Cookie Clicker. It is a simple incremental game,
 you click the ore, you get ore. You currently have the option to purchase a miner to boost
