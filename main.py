@@ -1,13 +1,15 @@
 '''
 Author: Joe Auz
-Version: 1.2
+Version: 1.3
 Name: ClickIn Ore
 Summary: This is a game with heavy inspiration taken from Cookie Clicker. It is a simple incremental game,
-you click the ore, you get ore. In version 1.1 you currently have the option to purchase a miner to boost
+you click the ore, you get ore. You currently have the option to purchase a miner to boost
 the amount of ore you get per click. Are you able to reach the fabled Cobalt tier?
 '''
 
-import pygame, os, json, math, time
+import pygame
+import os
+import json
 
 pygame.display.set_caption('ClickIn Ore')
 pygame.font.init()
@@ -53,80 +55,91 @@ COBALT = pygame.transform.scale(pygame.image.load(
 MINER = pygame.transform.scale(pygame.image.load(
     os.path.join('Assets', 'miner.png')), (MINER_WIDTH, MINER_HEIGHT))
 
+
 class Player:
 
     def __init__(self, total_ore, total_miners, miner_cost, miner_multiplier, ore_per_click):
         self.ore = total_ore
         self.miners = total_miners
         self.miner_cost = miner_cost
-        self.multiplier = miner_multiplier
         self.per_click = ore_per_click
+        self.multiplier = miner_multiplier
 
     def get_ore(self):
         return self.ore
 
+    def get_per_click(self):
+        return self.per_click
+
+    def get_miners(self):
+        return self.miners
+
+    def get_mult(self):
+        return self.multiplier
+
+    def get_miner_cost(self):
+        return self.miner_cost
+
     def inc_ore(self):
         self.ore += self.per_click
-    
+
     def inc_miner(self):
         self.miners += 1
+        self.ore -= self.miner_cost
+        self.multiplier *= 1.005
 
     def up_miner_cost(self):
-        self.miner_cost += 1
+        self.miner_cost *= 1.25
 
-# Just implemented Player class, need to swap below functions to Player object for all data.
+    def up_per_click(self):
+        self.per_click *= self.multiplier
 
 
-def draw_play(total_ore, total_miners, miner_cost, ore_per_click):
+def draw_play(player_one):
     WIN.blit(MINE_BG, (0, 0))
 
-    if total_ore < 10:
+    if player_one.get_ore() < 10:
         WIN.blit(COAL, (WIDTH//2 - ORE_WIDTH // 2, HEIGHT // 2 - 100))
-    elif 10 <= total_ore < 20:
+    elif 10 <= player_one.get_ore() < 20:
         WIN.blit(GOLD, (WIDTH//2 - ORE_WIDTH // 2, HEIGHT // 2 - 100))
-    elif 20 <= total_ore < 30:
+    elif 20 <= player_one.get_ore() < 30:
         WIN.blit(TITANIUM, (WIDTH//2 - ORE_WIDTH // 2, HEIGHT // 2 - 100))
-    elif 30 <= total_ore < 40:
+    elif 30 <= player_one.get_ore() < 40:
         WIN.blit(ADDY, (WIDTH//2 - ORE_WIDTH // 2, HEIGHT // 2 - 100))
-    elif 40 <= total_ore:
+    elif 40 <= player_one.get_ore():
         WIN.blit(COBALT, (WIDTH//2 - ORE_WIDTH // 2, HEIGHT // 2 - 100))
 
     num_ore_text = POINTS_FONT.render(
-        'Total Ore: ' + str(round(total_ore, 2)), 1, WHITE)
+        'Total Ore: ' + str(round(player_one.get_ore(), 2)), 1, WHITE)
     WIN.blit(num_ore_text, (WIDTH // 2 - ORE_WIDTH // 2, 10))
 
     ore_per_click_text = CLICK_FONT.render(
-        'Per Click: ' + str(round(ore_per_click, 2)), 1, WHITE)
+        'Per Click: ' + str(round(player_one.get_per_click(), 3)), 1, WHITE)
     WIN.blit(ore_per_click_text, (WIDTH // 2 - ORE_WIDTH // 2 + 30, 415))
 
     WIN.blit(MINER, (MINER_X, MINER_Y))
 
     miner_shop_count_text = SHOP_FONT.render(
-        'Total Miners: ' + str(total_miners), 1, WHITE)
+        'Total Miners: ' + str(player_one.get_miners()), 1, WHITE)
     WIN.blit(miner_shop_count_text, (MINER_X + 15, MINER_Y - 25))
 
     miner_shop_cost_text = SHOP_FONT.render(
-        'Cost: ' + str(round(miner_cost, 2)), 1, WHITE)
+        'Cost: ' + str(round(player_one.get_miner_cost(), 2)), 1, WHITE)
     WIN.blit(miner_shop_cost_text, (MINER_X + 25, MINER_Y + 115))
 
     pygame.display.update()
 
-def handle_miner_shop(total_miners):
-    if total_miners > 0:
+
+def handle_miner_shop(player_one):
+    if player_one.miners > 0:
         pygame.event.post(pygame.event.Event(MINER_SHOP))
 
-def save_game(total_ore, total_miners, ore_per_click, miner_multiplier, miner_cost, player_one):
-    save_data = {
-        'Ore': int(total_ore),
-        'Miners': total_miners,
-        'PerClick': ore_per_click,
-        'MinerMulti': miner_multiplier,
-        'MinerCost': miner_cost
-    }
-    print(save_data)
+
+def save_game(player_one):
+    print(player_one.__dict__)
     with open('ClickIn_Ore.txt', 'w') as save_file:
-        # json.dump(save_data, save_file)
         json.dump(player_one.__dict__, save_file)
+
 
 def load_game():
     if os.path.exists('ClickIn_Ore.txt'):
@@ -136,22 +149,16 @@ def load_game():
     else:
         return False
 
+
 def play():
 
     if load_game():
-        ore_per_click = load_game()['PerClick']
-        total_ore = load_game()['Ore']
-        total_miners = load_game()['Miners']
-        miner_multiplier = load_game()['MinerMulti']
-        miner_cost = load_game()['MinerCost']
-        player_one = Player(total_ore, total_miners, miner_cost, miner_multiplier, ore_per_click)
+        player_one = Player(load_game()['ore'], load_game()['miners'],
+                            load_game()['miner_cost'], load_game()['multiplier'], load_game()['per_click'])
+
     else:
-        ore_per_click = 1
-        total_ore = 0
-        total_miners = 0
-        miner_multiplier = 1
-        miner_cost = 5
-        player_one = Player(total_ore=0, total_miners=0, miner_cost=5, miner_multiplier=1, ore_per_click=1)
+        player_one = Player(total_ore=0, total_miners=0,
+                            miner_cost=5, miner_multiplier=1, ore_per_click=1)
 
     ore = pygame.Rect(WIDTH // 2 - ORE_WIDTH // 2, HEIGHT //
                       2 - 100, ORE_WIDTH, ORE_HEIGHT)
@@ -167,24 +174,18 @@ def play():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 if ore.collidepoint(x, y):
-                    total_ore += ore_per_click
                     player_one.inc_ore()
-                    print(player_one.get_ore())
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
-                if miner.collidepoint(x, y) and total_ore >= miner_cost:
-                    total_ore -= miner_cost
-                    total_miners += 1
-                    handle_miner_shop(total_miners)
+                if miner.collidepoint(x, y) and player_one.ore >= player_one.miner_cost:
+                    player_one.inc_miner()
+                    handle_miner_shop(player_one)
             if event.type == MINER_SHOP:
-                miner_multiplier += 0.01
-                miner_cost = miner_cost * miner_multiplier
-                ore_per_click *= miner_multiplier
+                player_one.up_miner_cost()
+                player_one.up_per_click()
 
-
-        # draw_play(math.floor(total_ore), total_miners, round(miner_cost), math.floor(ore_per_click))
-        draw_play(total_ore, total_miners, miner_cost, ore_per_click)
-    save_game(total_ore, total_miners, ore_per_click, miner_multiplier, miner_cost, player_one)
+        draw_play(player_one)
+    save_game(player_one)
     pygame.quit()
 
 
