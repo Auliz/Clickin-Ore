@@ -1,0 +1,1 @@
+{"ore": 10, "miners": 0, "miner_cost": 5, "per_click": 1, "multiplier": 1}
