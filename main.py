@@ -7,6 +7,7 @@ you click the ore, you get ore. You currently have the option to purchase a mine
 the amount of ore you get per click. Are you able to reach the fabled Cobalt tier?
 '''
 
+from turtle import width
 import pygame
 import os
 import json
@@ -54,6 +55,8 @@ COBALT = pygame.transform.scale(pygame.image.load(
     os.path.join('Assets', 'cobalt.png')), (ORE_WIDTH, ORE_HEIGHT))
 MINER = pygame.transform.scale(pygame.image.load(
     os.path.join('Assets', 'miner.png')), (MINER_WIDTH, MINER_HEIGHT))
+PLAY_BTN = pygame.image.load(os.path.join('Assets', 'play_button.png'))
+QUIT_BTN = pygame.image.load(os.path.join('Assets', 'quit_button.png'))
 
 
 class Player:
@@ -94,6 +97,14 @@ class Player:
     def up_per_click(self):
         self.per_click *= self.multiplier
 
+class Button:
+    def __init__(self, x, y, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+
+    def draw(self):
+        WIN.blit(self.image, (self.rect.x, self.rect.y))
 
 def draw_play(player_one):
     WIN.blit(MINE_BG, (0, 0))
@@ -150,6 +161,29 @@ def load_game():
         return False
 
 
+def menu():
+    # WIN.blit(MINE_BG, (0, 0))
+    play_btn = Button(100, 200, PLAY_BTN)
+    quit_btn = Button(350, 200, QUIT_BTN)
+
+    WIN.fill((202, 228, 241))
+    menu_text = POINTS_FONT.render(
+        'Main Menu', 1, WHITE)
+    WIN.blit(menu_text, (WIDTH // 2 - ORE_WIDTH // 2, 10))
+    play_btn.draw()
+    quit_btn.draw()
+
+    for event in pygame.event.get():
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            x, y = event.pos
+            if play_btn.rect.collidepoint(x, y):
+                play()
+            if quit_btn.rect.collidepoint(x, y):
+                pygame.quit()
+
+    pygame.display.update()
+
+
 def play():
 
     if load_game():
@@ -189,5 +223,17 @@ def play():
     pygame.quit()
 
 
+def main():
+    run = True
+    clock = pygame.time.Clock()
+    while run:
+        clock.tick(FPS)
+        menu()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+    pygame.quit()
+
+
 if __name__ == '__main__':
-    play()
+    main()
