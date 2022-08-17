@@ -6,7 +6,7 @@ Summary: This is a game with heavy inspiration taken from Cookie Clicker. It is 
 you click the ore, you get ore. You currently have the option to purchase a miner to boost
 the amount of ore you get per click. Are you able to reach the fabled Cobalt tier?
 
-Test for learning if git works.
+Test for learning if git works. Do I still work?
 '''
 
 from turtle import width
